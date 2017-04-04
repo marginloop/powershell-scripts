@@ -1,4 +1,6 @@
-﻿$scriptpath = $MyInvocation.MyCommand.Path
+﻿#setting up default output and input paths
+
+$scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
 $outputpath="$dir\output\"
 $inputpath="$dir\input\"
