@@ -16,11 +16,11 @@ $inputpath="$dir\input\"
 $groups = import-csv "$inputpath\mailboxes.csv"
 $users = import-csv "$inputpath\users.csv"
 
+#for each user add the user to the group with full access rights
 foreach($group in $groups){
 
      $A = $group.Alias
 
-     #for each user add the user to the group with full access rights
      foreach($user in $users){
 
         Add-MailboxPermission -Identity "$A" -User "$user" -AccessRights FullAccess
