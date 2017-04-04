@@ -8,12 +8,9 @@ foreach($group in $groups){
      $A = $group.Alias
 
      foreach($user in $users){
-        $u = Get-User -Filter {Name -like "*$user*"}
-        Add-MailboxPermission -Identity "$A" -User "" -AccessRights FullAccess
+        #$u = Get-User -Filter {Name -like "*$user*"}
+        Add-MailboxPermission -Identity "$A" -User "$user" -AccessRights FullAccess
 
      }
     
 }
-
-
-#Display name, User name, Password, ou, primary smtp address
