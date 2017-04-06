@@ -1,13 +1,16 @@
-﻿#open powershell remote session
-
-$output = "$env:USERPROFILE\Documents\WindowsPowerShell\scripts\output\"
+﻿#seting up file output/input
+$scriptpath = $MyInvocation.MyCommand.Path
+$dir = Split-Path $scriptpath
+$outputpath="$dir\output\"
+$inputpath="$dir\input\"
 
 #create .csv for session/date
 #--setup of csv name
 $date =  Get-Date -Format dd-MM-y
 $company = Read-Host "Please Enter the Companie's Acronym"
 $company = $company.ToUpper()
-$csv = $output+$company+"_MailPublicFolder_"+$date+".csv"
+$csv = "$outputpath\+$company+_MailPublicFolder_$date.csv"
+
 #--creation of csv
 Write-Host "--Creating CSV"
 New-Item $csv -ItemType File
