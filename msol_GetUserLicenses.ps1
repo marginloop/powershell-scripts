@@ -14,6 +14,7 @@ $Sku = @{
     "O365_BUSINESS_ESSENTIALS" = "Business Essentials"
     "OFFICESUBSCRIPTION" = "Office Professional Plus"
     "O365_BUSINESS" = "o365 Business"
+    "EXCHANGE_S_ENTERPRISE" = "Exchange Online Plan 2"
 	"DESKLESSPACK" = "Office 365 (Plan K1)"
 	"DESKLESSWOFFPACK" = "Office 365 (Plan K2)"
 	"LITEPACK" = "Office 365 (Plan P1)"
