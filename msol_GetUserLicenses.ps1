@@ -24,45 +24,27 @@ foreach ($h in $LicenseTypes){
 
 $headers | Out-File -FilePath $license_report
 
+#looping through each user and checking
 foreach($user in $users){
     $dn = $user.DisplayName
     $upn = $user.UserPrincipalName
     $data = "$dn, $upn"
+    
+    foreach($license in $LicenseTypes){
 
-    foreach($userlicense in $user.licenses){
-        
-        
-        #license match user write 1, else write 0
+        foreach($userlicense in $user.licenses){
             
-        $ul = $userlicense.AccountSkuId
-        $ul = $ul.SubString($ul.LastIndexOf(":")+1)
-
-        <#TODO: LICENSE CHECK
-        foreach($license in $LicenseTypes){
+            $ul = $userlicense.AccountSkuId
+            $ul = $ul.SubString($ul.LastIndexOf(":")+1)
+            #license match user write 1, else write 0
             #if matches license, write 1
             #if no match for license is found write 0
-        }#>
+            
+            
+            $data += ", $license_check"
         
-        $data += ", $ul"
-        
+        }
+        $data
+        "======="
     }
-    $data
-    "======="
 }
-
-
-
-
-<#
-foreach($user in $users){
-     $dn = $user.DisplayName
-     $upn = $user.UserPrincipalName
-     ##$licenses = Get-MsolUser -UserPrincipalName $upn | select -ExpandProperty licenses
-     $l = $license.AccountSkuId
-     $l = $l.SubString($l.LastIndexOf(":")+1)
-     $l = $l.Replace(" ", ",")
-     
-     "$dn, $upn, $l"| out-file -Append $license_report
-
-}
-#>
