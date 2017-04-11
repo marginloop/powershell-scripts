@@ -3,13 +3,11 @@ $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
 $license_report = "$dir\license_report.csv"
 
-<#connecting to the credential service
 $credential = Get-Credential
 Connect-MsolService -Credential $credential
-#>
-#get the users
-$users = Get-MsolUser -all
 
+#get all users
+$users = Get-MsolUser -all
 
 #setup Header for license report
 $headers = "DisplayName, UserPrincipalName"
@@ -29,22 +27,24 @@ foreach($user in $users){
     $dn = $user.DisplayName
     $upn = $user.UserPrincipalName
     $data = "$dn, $upn"
-    
+    $license_check = 0
+
     foreach($license in $LicenseTypes){
+        $license_check = 0
 
         foreach($userlicense in $user.licenses){
             
             $ul = $userlicense.AccountSkuId
-            $ul = $ul.SubString($ul.LastIndexOf(":")+1)
+            
             #license match user write 1, else write 0
             #if matches license, write 1
-            #if no match for license is found write 0
-            
-            
-            $data += ", $license_check"
+            if($ul -eq $license.AccountSkuId){
+                $license_check = 1
+            }   
         
         }
-        $data
-        "======="
+        $data += ", $license_check"
+
     }
+    $data | Out-File -Append -FilePath $license_report -NoClobber
 }
