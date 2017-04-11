@@ -10,9 +10,9 @@ $inputpath="$dir\input\"
 #locations of the imports will be in the location of the script files
 # SCRIPTFILELOCATION:\input\mailboxes.csv
 --headers are: Alias, DisplayName, ProxyAddress
+--Alias, DisplayNames, and Proxy addresses are important for the functionality of this script
 ###################>
 $file = import-csv "$inputpath\mailboxes.csv"
-
 
 foreach($f in $file){
      $A = $f.Alias
@@ -21,6 +21,3 @@ foreach($f in $file){
 
      New-DistributionGroup -Alias "$A" -DisplayName "$DN" -Name "$DN" -PrimarySmtpAddress "$PSMTP"
 }
-
-
-#Set-DistributionGroup -Identity "$DN" -PrimarySmtpAddress "$PSMTP"

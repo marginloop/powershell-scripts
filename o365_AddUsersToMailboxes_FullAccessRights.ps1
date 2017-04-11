@@ -22,8 +22,8 @@ foreach($group in $groups){
      $A = $group.Alias
 
      foreach($user in $users){
-
-        Add-MailboxPermission -Identity "$A" -User "$user" -AccessRights FullAccess
+        $u = $user.User
+        Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess
 
      }
     
