@@ -1,7 +1,7 @@
 ﻿#setting up default output and input paths
 $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
-$license_report = "$dir\license_report.csv"
+$license_report = "$dir\license_report_$(Get-Date -Format MM-dd-yyyy).csv"
 $debug = $false
 $credential = Get-Credential
 Connect-MsolService -Credential $credential
@@ -18,7 +18,7 @@ $Sku = @{
 	"DESKLESSPACK" = "Office 365 (Plan K1)"
 	"DESKLESSWOFFPACK" = "Office 365 (Plan K2)"
 	"LITEPACK" = "Office 365 (Plan P1)"
-	"EXCHANGESTANDARD" = "Office 365 Exchange Online"
+	"EXCHANGESTANDARD" = "Exchange Online Plan 1"
 	"STANDARDPACK" = "Enterprise Plan E1"
 	"STANDARDWOFFPACK" = "Office 365 (Plan E2)"
 	"ENTERPRISEPACK" = "Enterprise Plan E3"
