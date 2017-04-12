@@ -25,9 +25,8 @@ foreach($group in $groups){
      $A = $group.DisplayName
      
      foreach($user in $users){
-        $u = $user.ProxyAddress
+        $u = $user.ProxyAddresses
 
-        #TODO: Verify adding contacts to Distribution group members
         Add-DistributionGroupMember -Identity "$a" -Member "$u"
 
      }
