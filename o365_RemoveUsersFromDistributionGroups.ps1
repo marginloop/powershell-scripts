@@ -12,8 +12,8 @@ SCRIPTFILELOCATION:\input\mailboxes.csv
 --mailboxes are referenced by alias
 --headers aer: DisplayName
 SCRIPTFILELCOATION:\input\users.csv
-#--users are referenced by username/displayname
-#--headers are: ProxyAddresse
+#--users are referenced by ProxyAddresses
+#--headers are: ProxyAddresses
 ###################>
 $groups = import-csv "$inputpath\mailboxes.csv"
 $users = import-csv "$inputpath\users.csv"
@@ -26,7 +26,7 @@ foreach($group in $groups){
      foreach($user in $users){
         $u = $user.ProxyAddress
         "$u"
-        #TODO: Verify adding contacts to Distribution group members
+       
         Remove-DistributionGroupMember -Identity "$a" -Member "$u"
         
      }

@@ -3,15 +3,20 @@ $users = @()
 
 <######
     
-    enable archiving for the mailbox,
+    check archiving> enable archiving for the mailbox,
     hide the mailbox from the address list
 
 ######>
 foreach($u in $users){
+    $mailbox = Get-Mailbox -Identity $u
     
-    Enable-Mailbox -Identity $u -Archive
-    Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u -Verbose
-    
+    if($mailbox.ArchiveStatus -ne "Active"){
+
+        Enable-Mailbox -Identity $u -Archive -Verbose
+
+    }
+
+    Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u -Verbose 
     #$adhidemailbox += "`rSet-ADUser -Identity $u -"
 }
 
@@ -30,6 +35,6 @@ foreach($u in $users){
      Set-Mailbox -Identity $upn -Type Shared -Verbose
 
      $license = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
-     Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId
+     Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId -Verbose
 }
 #$adhidemailbox
