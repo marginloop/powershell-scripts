@@ -1,4 +1,5 @@
-﻿$users = @()
+﻿
+$users = @()
 
 <######
     
@@ -9,8 +10,9 @@
 foreach($u in $users){
     
     Enable-Mailbox -Identity $u -Archive
-    Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u
-
+    Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u -Verbose
+    
+    #$adhidemailbox += "`rSet-ADUser -Identity $u -"
 }
 
 <######
@@ -30,3 +32,4 @@ foreach($u in $users){
      $license = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
      Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId
 }
+#$adhidemailbox

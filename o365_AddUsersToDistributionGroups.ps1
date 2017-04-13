@@ -27,7 +27,7 @@ foreach($group in $groups){
      foreach($user in $users){
         $u = $user.ProxyAddresses
 
-        Add-DistributionGroupMember -Identity "$a" -Member "$u"
+        Add-DistributionGroupMember -Identity "$a" -Member "$u" -Verbose
 
      }
     

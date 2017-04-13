@@ -3,5 +3,7 @@ $global:Session = New-PSSession -ConfigurationName Microsoft.Exchange -Connectio
 
 Write-Host "## # ##Opening Powershell Remote Session"
 Import-PSSession $Session
+Connect-MsolService -Credential $UserCredential
+
 $time = Get-Date
 $time.DateTime
