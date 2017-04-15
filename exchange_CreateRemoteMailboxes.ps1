@@ -13,7 +13,7 @@ $inputpath="$dir\input\"
 ###################>
 $file = import-csv "$inputpath\mailboxes.csv"
 
-$p = Read-Host -AsSecureString "password"
+$p = Read-Host -AsSecureString "Please enter a password for the accounts"
 $domain = Read-host "enter the domain of the email address"
 
 foreach($f in $file){
@@ -24,6 +24,3 @@ foreach($f in $file){
 
      New-RemoteMailbox -Alias '$A' -Name '$DN' -DisplayName '$DN' -UserPrincipalName '$upn' -password $p | out-file -Append ".\output\dlcommands_$(get-date -Format yyyy-MM-dd).txt"
 }
-
-
-#Display name, User name, Password, ou, primary smtp address

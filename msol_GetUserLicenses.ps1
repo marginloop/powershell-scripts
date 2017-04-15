@@ -1,16 +1,43 @@
-﻿
-Connect-MsolService
+﻿<#
+    ...............................
+    Sets up the input and output paths for data
+    Connects to the msol service,
+    fetches all users for future iteration
+    fetches all users for future iteration
+    initializes a reference table for human readable csv headers
+    initializes headers for license reports and future iteration
+    iterates through billed license types and adds license names csv headers
+    iterates through total actively billed licenses, preps for csv write
+    ...............................
 
-$LicenseTypes = Get-MsolAccountSku
-$Client =$LicenseTypes.AccountName[1]
+    sets up the main header for the files
+    includes the license types, license counts, 
+    blank space for comparison calculations,
+    and headers for the main license audit.
+
+    loops through each user(email) in office 365;
+    [nested]loops through each license type billed;
+    [[nested]]loops through each user license, 
+        -compares license to billed license,
+        -preps a 1 or 0 to output to csv depending on comparison
+    output's results to the file
+#>
+
+#...............................#...............................
+#...............................#...............................
 
 #setting up default output and input paths
 $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
 $license_report = "$dir\$client-LicenseReport_$(Get-Date -Format MM-dd-yyyy).csv"
-$debug = $false
+$debug = $true
 
-#get all users
+#connects to msol service
+Connect-MsolService
+
+#fetch licenses, users, and account name
+$LicenseTypes = Get-MsolAccountSku
+$Client =$LicenseTypes.AccountName[0]
 $users = Get-MsolUser -all
 
 #setting up table reference for user readible licenses
@@ -21,7 +48,7 @@ $Sku = @{
     "O365_BUSINESS_PREMIUM" = "O365 Business Premium"
     "EXCHANGE_S_ENTERPRISE" = "Exchange Online Plan 2"
     "EXCHANGEDESKLESS" = "Exchange Online Kiosk"
-    "EXCHANGEARCHIVE_ADDON"="Exchange Online Archiving (EOA)"
+    "EXCHANGEARCHIVE_ADDON"="Exchange Online Archiving (exchange-P2)"
 	"DESKLESSPACK" = "Office 365 (Plan K1)"
 	"DESKLESSWOFFPACK" = "Office 365 (Plan K2)"
 	"LITEPACK" = "Office 365 (Plan P1)"
@@ -65,7 +92,7 @@ $Sku = @{
 $activeHeader= "Status"
 $headers = "DisplayName, UserPrincipalName"
 
-
+#iterates through each license name and preps the csv header
 foreach ($h in $LicenseTypes){
     
     $h = $h.SkuPartNumber
@@ -73,17 +100,23 @@ foreach ($h in $LicenseTypes){
     $activeHeader +=  "," + $Sku.Item($h)
 }
 
-#counting total 
+#iterates through total actively billed licenses, 
+#preps for csv write
 $licensecount = "Active"
 foreach ($n in $LicenseTypes.ActiveUnits){
     $n = $n.ToString()
-
-    $licensecount += ",$n"
-    
+    $licensecount += ",$n"    
 }
-#
-#output total licenses and headers to file
-#
+
+#...............................#...............................
+#...............................#...............................
+
+<#
+    sets up the main header for the files
+    includes the license types, license counts, 
+    blank space for comparison calculations,
+    and headers for the main license audit.
+#>
 "LICENSES"| Out-File -FilePath $license_report 
 $activeHeader | Out-File -FilePath $license_report -Append
 $licensecount | Out-File -FilePath $license_report -Append
@@ -91,7 +124,15 @@ $licensecount | Out-File -FilePath $license_report -Append
 "ASSIGNED LICENSES"| Out-File -FilePath $license_report -Append
 $headers | Out-File -FilePath $license_report -Append
 
-#looping through each user and checking
+<#
+    loops through each user(email) in office 365;
+    [nested]loops through each license type billed;
+    [[nested]]loops through each user license, 
+        -compares license to billed license,
+        -preps a 1 or 0 to output to csv depending on comparison
+    output's results to the file
+#>
+#user loop
 foreach($user in $users){
     $dn = $user.DisplayName
     $dn = $dn -replace ‘,’,''
@@ -99,38 +140,28 @@ foreach($user in $users){
     $data = "$dn, $upn"
     $license_check = 0
 
-    if($debug -eq $true){$compare = "DomainName, UserPrincipalName"}
-
-    #loop through each license in the licenses types
+    if($debug -eq $true){$compare = "`n`rLicenseTypes:"}
+    
+    #license type loop
     foreach($license in $LicenseTypes){
-        
-        #perform a license check for each license in the users licenses
         $license_check = 0
+
+        #user license loop
         foreach($userlicense in $user.licenses){
             
             $ul = $userlicense.AccountSkuId
-            
-            #license match user write 1, keep default value of 0 for license
-            #if matches license, write 1
+
             if($ul -eq $license.AccountSkuId){
                 $license_check = 1
-            }   
-        
+            }         
         }
         
         $data += ", $license_check"
-        if($debug -eq $true){$compare += ", " + $license.AccountSkuID}
-        
-
+        if($debug -eq $true){$compare += ", " + $license.SkuPartNumber}
+            
     }
     
-    if($debug -eq $true){
-        $compare
-        $data
-    }
+    if($debug -eq $true){"$compare `r`nUserData:$data`r`n----"}
 
-    #
-    #output data proceccessed from license checks to file
-    #
     $data | Out-File -Append -FilePath $license_report -NoClobber
 }
