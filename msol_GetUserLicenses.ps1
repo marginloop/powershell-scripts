@@ -1,10 +1,14 @@
-﻿#setting up default output and input paths
+﻿
+Connect-MsolService
+
+$LicenseTypes = Get-MsolAccountSku
+$Client =$LicenseTypes.AccountName[1]
+
+#setting up default output and input paths
 $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
-$license_report = "$dir\license_report_$(Get-Date -Format MM-dd-yyyy).csv"
+$license_report = "$dir\$client-LicenseReport_$(Get-Date -Format MM-dd-yyyy).csv"
 $debug = $false
-$credential = Get-Credential
-Connect-MsolService -Credential $credential
 
 #get all users
 $users = Get-MsolUser -all
@@ -14,7 +18,10 @@ $Sku = @{
     "O365_BUSINESS_ESSENTIALS" = "Business Essentials"
     "OFFICESUBSCRIPTION" = "Office Professional Plus"
     "O365_BUSINESS" = "o365 Business"
+    "O365_BUSINESS_PREMIUM" = "O365 Business Premium"
     "EXCHANGE_S_ENTERPRISE" = "Exchange Online Plan 2"
+    "EXCHANGEDESKLESS" = "Exchange Online Kiosk"
+    "EXCHANGEARCHIVE_ADDON"="Exchange Online Archiving (EOA)"
 	"DESKLESSPACK" = "Office 365 (Plan K1)"
 	"DESKLESSWOFFPACK" = "Office 365 (Plan K2)"
 	"LITEPACK" = "Office 365 (Plan P1)"
@@ -54,23 +61,40 @@ $Sku = @{
     "INTUNE_A" = "Windows Intune Plan A"
 	}
 
-#setup Header for license report
+#setup Headers for license report
+$activeHeader= "Status"
 $headers = "DisplayName, UserPrincipalName"
-$LicenseTypes = Get-MsolAccountSku
+
+
 foreach ($h in $LicenseTypes){
     
     $h = $h.SkuPartNumber
     $headers += "," + $Sku.Item($h)
+    $activeHeader +=  "," + $Sku.Item($h)
 }
 
+#counting total 
+$licensecount = "Active"
+foreach ($n in $LicenseTypes.ActiveUnits){
+    $n = $n.ToString()
+
+    $licensecount += ",$n"
+    
+}
 #
-#output headers to file
+#output total licenses and headers to file
 #
-$headers | Out-File -FilePath $license_report
+"LICENSES"| Out-File -FilePath $license_report 
+$activeHeader | Out-File -FilePath $license_report -Append
+$licensecount | Out-File -FilePath $license_report -Append
+"Assigned(calculated from assigned licenses)" | Out-File -FilePath $license_report -Append
+"ASSIGNED LICENSES"| Out-File -FilePath $license_report -Append
+$headers | Out-File -FilePath $license_report -Append
 
 #looping through each user and checking
 foreach($user in $users){
     $dn = $user.DisplayName
+    $dn = $dn -replace ‘,’,''
     $upn = $user.UserPrincipalName
     $data = "$dn, $upn"
     $license_check = 0
