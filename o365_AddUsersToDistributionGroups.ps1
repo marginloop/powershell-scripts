@@ -10,12 +10,11 @@ $inputpath="$dir\input\"
 locations of the imports will be in the location of the script files
 SCRIPTFILELOCATION:\input\mailboxes.csv
 --mailboxes are referenced by alias
---important headers aer: DisplayName
+--headers aer: DisplayName
 SCRIPTFILELCOATION:\input\users.csv
---users are referenced by username/displayname
---important headers are: ProxyAddress
+#--users are referenced by ProxyAddresses
+#--headers are: ProxyAddresses
 ###################>
-
 $groups = import-csv "$inputpath\mailboxes.csv"
 $users = import-csv "$inputpath\users.csv"
 
@@ -26,9 +25,10 @@ foreach($group in $groups){
      
      foreach($user in $users){
         $u = $user.ProxyAddresses
-
-        Add-DistributionGroupMember -Identity "$a" -Member "$u" -Verbose
-
+        "$u"
+       
+        Add-DistributionGroupMember -Identity "$a" -Member "$u"
+        
      }
     
 }
