@@ -18,6 +18,17 @@ foreach($u in $users){
 
     Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u -Verbose 
     #$adhidemailbox += "`rSet-ADUser -Identity $u -"
+
+    $groups = Get-DistributionGroup
+    foreach($g in $groups){
+        $members = Get-DistributionGroupMember -Identity $g.DisplayName
+        foreach($m in $members){
+            if($mailbox.DisplayName -eq $m.DisplayName){
+                Remove-DistributionGroupMember -Identity $g.DisplayName -Member $mailbox.DisplayName -whatif
+            }
+        }
+    }
+
 }
 
 <######

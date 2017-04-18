@@ -1,13 +1,15 @@
 ﻿<#
     ...............................
-    Sets up the input and output paths for data
+    ...............................
     Connects to the msol service,
+    Sets up the input and output paths for data.
     fetches all users for future iteration
     fetches all users for future iteration
     initializes a reference table for human readable csv headers
     initializes headers for license reports and future iteration
     iterates through billed license types and adds license names csv headers
     iterates through total actively billed licenses, preps for csv write
+    ...............................
     ...............................
 
     sets up the main header for the files
@@ -26,14 +28,14 @@
 #...............................#...............................
 #...............................#...............................
 
+#connects to msol service
+Connect-MsolService
+
 #setting up default output and input paths
 $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
 $license_report = "$dir\$client-LicenseReport_$(Get-Date -Format MM-dd-yyyy).csv"
-$debug = $true
-
-#connects to msol service
-Connect-MsolService
+$debug = $false
 
 #fetch licenses, users, and account name
 $LicenseTypes = Get-MsolAccountSku
