@@ -2,12 +2,13 @@
 $dir = Split-Path $scriptpath
 $outputpath="$dir\output\"
 $inputpath="$dir\input\"
+$outcsv = "$outputpath\time-tracking_$(get-date -format yyyy-MM-dd).csv"
+$getcolor = 'Cyan'
+$setcolor = 'Magenta'
 
-$outcsv = "$dir\time-tracking_$(get-date -format yyyy-MM-dd).csv"
-
-if(!(Test-Path $Path)){
+if((Test-Path $outcsv) -eq $false){
      
-    New-Item -Path $outcsv -ItemType directory
+    New-Item -Path $outcsv -ItemType file
 
 }
 
@@ -20,26 +21,34 @@ function Invoke-Time {
 #set end_time
 #check start_time
 #if start_time entry, then write to end_time
-function settime{
+function set-time{
     
 
 }
 
 #get current time from csv
-funtion gettime{
+function get-time{
     $incsv = Import-Csv $outcsv
+    $last_line = $incsv| Sort-Object start_time | Select -last 1
+    $st = $last_line.start_time
+    $gd = Get-Date 
+
+    $ts = New-TimeSpan -Start $st -End $gd
+    $tm = $ts.Minutes
+    Write-Host -ForegroundColor $getcolor "StartTime: $st`r`nTimeSpent: $tm"
+
 }
 
 #assign desctiption id
 #write id in seperate file, with time
 #use id until end_time is filled
-function setdesc{
+function set-desc{
     
 }
 
-function getdesc{
+function get-desc{
     $incsv = Import-Csv $outcsv
-    $incsv.id
+    
 
 }
 #get all descriptions matching id
