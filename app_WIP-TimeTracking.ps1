@@ -21,15 +21,10 @@ if((Test-Path $timecsv) -eq $false){
 if((Test-Path $desccsv) -eq $false){
     New-Item -Path $desccsv -ItemType file
 
-    $desc_header = "id, description"
-    $defalt_data = "0,0,0"
+    $desc_header = "id,description"
+    $defalt_data = "0,0"
     $desc_header | Out-File $desccsv
     $defalt_data | Out-File $desccsv -Append
-}
-
-#main handler
-function Invoke-Time {
-    
 }
 
 #set start_time
@@ -37,6 +32,7 @@ function Invoke-Time {
 #check start_time
 #if start_time entry, then write to end_time
 function set-time{
+param([string]$description)
     $last_line = ""
     $incsv = Import-Csv $timecsv
     $last_line = $incsv| Sort-Object start_time | Select -last 1
@@ -49,14 +45,14 @@ function set-time{
         $incsv | Export-Csv $timecsv -NoTypeInformation
         set-time           
     }else{
-
-        get-time
         $id += 1
+        get-time
         $et = $last_line.end_time
         $data = "$id,$et,0"
-        $data| out-file $timecsv -Append -NoClobber -Encoding ascii
+        $data| out-file $timecsv -Append -Encoding ascii
         Write-Host -ForegroundColor $setcolor "$last_line"
     }
+    $description = ""
     
 }
 
@@ -69,19 +65,40 @@ function get-time{
 
     $ts = New-TimeSpan -Start $st -End $gd
     $tm = $ts.Minutes
-    try{
+
     Write-Host -ForegroundColor $getcolor "StartTime: $st`r`nEndTime: $gd`r`nTimeSpent: $tm`r`n"
-    }catch{}
+
 }
 
 #assign desctiption id
 #write id in seperate file, with time
 #use id until end_time is filled
-function set-desc{
-    
+function set-description{
+param([string]$foreignkey, [string]$description)
+
+    if(($foreignkey -eq $null) -or ($foreignkey -eq " ")-or ($foreignkey -eq "")){
+        $last_line = ""
+        $incsv = Import-Csv $timecsv
+        $last_line = $incsv| Sort-Object start_time | Select -last 1
+        [int]$id = $last_line.id
+
+    }else{
+        $id = $foreignkey
+    }
+    if(($description -eq $null) -or ($description -eq " ")-or ($description -eq "")){
+        $description = Read-Host "Please Enter a description ($id)"   
+    }
+    $et = $description
+    $data = "${id},-${et}"
+    Write-Host -ForegroundColor $setcolor "id:$id`r`nDescription:$et`r`n"
+    $data| out-file $desccsv -Append
+    $description = ""
+    get-description
 }
 
-function get-desc{
+#get all descriptions matching id
+#outputs to console
+function get-description{
 param([string]$foreignkey)
 
     if(($foreignkey -eq $null) -or ($foreignkey -eq " ")-or ($foreignkey -eq "")){
@@ -95,18 +112,13 @@ param([string]$foreignkey)
     }
 
     $incsv = Import-Csv $desccsv
-
+    
     foreach($row in $incsv){
-        if($row.id -eq $id){
-            #assign value, #export csv
-            Write-Host -ForegroundColor $getcolor $row
-        }else{
-            "No matches found for id '$id'"
+        if($row.id -match $id){
+            Write-Host -ForegroundColor $getcolor "$($row.description)"
         }
     }
   
     $foreignkey = " "
 }
-#get all descriptions matching id
-#output to console
 
