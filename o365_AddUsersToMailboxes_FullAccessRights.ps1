@@ -13,23 +13,30 @@ $inputpath="$dir\input\"
 # SCRIPTFILELCOATION:\input\users.csv
 #--users are referenced by user name/display name
 ###################
-$groups = import-csv "$inputpath\mailboxes.csv"
+#$groups = import-csv "$inputpath\mailboxes.csv"
 #$groups = Get-Mailbox -RecipientTypeDetails UserMailbox
 $users = import-csv "$inputpath\users.csv"
 
 #for each user add the user to the group with full access rights
-$actionstaken = ""
+$actionstaken = "`r`nACTIONS/DETAILS:"
 foreach($group in $groups){
 
      $A = $group.Alias
      
      foreach($user in $users){
         $u = $user.DisplayName
-        Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess -Verbose
-        $actionstaken += "`r`n+Added $u to mailbox $A"
+        
+        if(($A -like "*pla*") -or ($A -like "*Azure*")){
+            "AccessRights not applied for '$A'"
+        }else{
+            #Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess -AutoMapping:$true
+            #Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess -AutoMapping:$false
+            $actionstaken += "`r`n+added full access rights '$u' on mailbox '$A'"
+        }
+
      }
     
 }
 
-"`r`nACTIONS/DETAILS:"
+
 $actionstaken

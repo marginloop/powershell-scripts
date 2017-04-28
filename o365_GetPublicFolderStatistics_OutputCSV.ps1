@@ -26,5 +26,3 @@ $output_format_table = Get-MailPublicFolder | Select-Object Name, EmailAddresses
 Write-Host "-Finished Processing Public Folder Statistics" 
 $output_format_table | Export-Csv -path $csv -NoTypeInformation
 Write-Host "--Output Written to "$csv
-
-
