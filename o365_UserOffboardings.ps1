@@ -1,5 +1,22 @@
-﻿
-$users = @()
+﻿<#
+  Get login credentials for office 365
+  pass the login to a global session
+  starts the powershell remote session
+#>
+#Get login credentials for office 365
+$UserCredential = Get-Credential
+$global:Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
+
+#starts the powershell remote session
+$time = Get-Date
+
+Write-Host "[$time] Opening Powershell Remote Session"
+Import-PSSession $Session
+Connect-MsolService -Credential $UserCredential
+
+.\o365_!OpenShellSession.ps1
+
+$users = @("")
 
 <######
     
@@ -61,10 +78,16 @@ foreach($u in $users){
         $data += "`r`n+set mailbox '$upn' as shared mailbox"
      }
 
-     $license = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
-     Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId -Verbose
+     $licenses = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
+     foreach($license in $licenses){
+        Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId
+        $data +="`r`n-removing license '$license' from '$upn'"
+     }
+
 }
-#$adhidemailbox
+#$adhidemailbox msExchangeHideFromAddressList
 
 $data
 $errs
+
+.\o365_!CloseShellSession.ps1
