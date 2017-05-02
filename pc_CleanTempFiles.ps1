@@ -1,5 +1,5 @@
 ﻿
-#opening setup and time tracking
+#setup and time tracking
 $StartDate = Get-Date
 $scriptname = "CleanTempFiles.ps1"
 
@@ -8,7 +8,11 @@ $dir = Split-Path $scriptpath
 $dir = (Get-Item -Path $dir -Verbose).FullName
 $logdelete = "$dir\delete_files_log.txt"
 
-#deleted files piped to it
+<#
+    function provides the main functionality of the script
+    Takes input -extension and -targetfolder to remove files
+    with specific extension
+#>
 function delete-files{
 Param([string]$Extension, [string]$TargetFolder)
     
