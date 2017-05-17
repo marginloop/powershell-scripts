@@ -51,6 +51,7 @@ param([string]$description)
     }else{
         $id += 1
         get-description
+        ""
         get-time
         $et = $last_line.end_time
         $data = "$id,$et,0"
@@ -76,10 +77,11 @@ function get-time{
 
     #calculate the current time spent in minutes
     $ts = New-TimeSpan -Start $st -End $gd
-    $tm = $ts.Minutes
+    $tm = $ts.TotalMinutes
+    $rm = [math]::Round($tm)
 
     #writes to console
-    Write-Host -ForegroundColor $getcolor "StartTime: $st`r`nEndTime: $gd`r`nTimeSpent: $tm`r`n"
+    Write-Host -ForegroundColor $getcolor "StartTime: $st`r`nEndTime: $gd`r`nTimeSpent: $rm`r`n"
 
 }
 
@@ -89,7 +91,7 @@ function get-time{
     use id until end_time is filled
 #>
 function set-description{
-param([string]$description, [string]$foreignkey, [switch]$loop)
+param([string]$description, [string]$prompt, [string]$type,[string]$foreignkey, [switch]$loop)
     $time_stamp = Get-Date
     if(($foreignkey -eq $null) -or ($foreignkey -eq " ")-or ($foreignkey -eq "")){
         $last_line = ""
@@ -101,15 +103,14 @@ param([string]$description, [string]$foreignkey, [switch]$loop)
         $id = $foreignkey
     }
     if(($description -eq $null) -or ($description -eq " ")-or ($description -eq "")){
-        $description = Read-Host "Please Enter a description ($id)"   
+        $description = Read-Host "$prompt ($id)"
     }
     $et = $description
-    $data = "${id},${time_stamp},-${et}"
+    $data = "${id},${time_stamp},-${et}, ${type}"
     Write-Host -ForegroundColor $setcolor "id:$id`r`nDescription:$et`r`n"
     $data| out-file $desccsv -Append
     $description = ""
-    get-description
-
+    $type = "description"
     if($loop){
         set-description -loop
     }
@@ -148,6 +149,14 @@ param([string]$foreignkey)
     $foreignkey = " "
 }
 
+function set-contact{
+    set-description -prompt "Name" -type "Name"
+    set-description -prompt "Company" -type "Company"
+    set-description -prompt "Phone" -type "Phone"
+    set-description -prompt "Ticket" -type "Ticket"
+}
+
+Set-Alias -name setc set-contact
 Set-Alias -name st set-time
 Set-Alias -name gt get-time
 Set-Alias -Name sd set-description

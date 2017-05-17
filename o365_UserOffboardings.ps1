@@ -14,9 +14,7 @@ Write-Host "[$time] Opening Powershell Remote Session"
 Import-PSSession $Session
 Connect-MsolService -Credential $UserCredential
 
-.\o365_!OpenShellSession.ps1
-
-$users = @("")
+$users = @("PUT USER HERE")
 
 <######
     
@@ -31,7 +29,7 @@ foreach($u in $users){
     
     if($mailbox.ArchiveStatus -ne "Active"){
 
-        Enable-Mailbox -Identity $u -Archive -Verbose
+        Enable-Mailbox -Identity $u -Archive
         $data += "`r`n+archiving mailbox '$mailbox'"
     }
 
@@ -39,7 +37,7 @@ foreach($u in $users){
     if($mailbox.HiddenFromAddressListsEnabled -eq $false){
         
         try{
-            Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u -Verbose 
+            Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u
             $data += "`r`n-hiding '$mailbox' from address lists"
         }catch{  
             $errs += "`r`n-Mailbox '$mailbox' unable to be hidden from the address book. Please check if o365 is synced through dirsync"
@@ -48,7 +46,6 @@ foreach($u in $users){
     }
 
     $groups = Get-DistributionGroup
-    
     foreach($g in $groups){
         $members = Get-DistributionGroupMember -Identity $g.DisplayName
         foreach($m in $members){
@@ -59,6 +56,23 @@ foreach($u in $users){
         }
     }
 
+    $UPN = $mailbox.UserPrincipalName
+     
+     if($mailbox.RecipientType -ne "Shared"){
+        Set-Mailbox -Identity $upn -Type Shared -Whatif
+        $data += "`r`n+set mailbox '$upn' as shared mailbox"
+     }
+
+     $licenses = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
+     foreach($license in $licenses){
+        Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId
+        $data +="`r`n-removing license '$($license.AccountSku.SkuPartNumber)' from '$upn'"
+     }
+
+     if($mailbox.FowardingAddress -ne $null){
+        Set-Mailbox -ForwardingAddress $null -DeliverToMailboxAndForward $false -Whatif
+     }
+
 }
 
 <######
@@ -68,23 +82,7 @@ foreach($u in $users){
     check the licenses for the mailbox and remove them
 
 ######>
-foreach($u in $users){
 
-     $mailbox = Get-Mailbox -Identity $u
-     $UPN = $mailbox.UserPrincipalName
-     
-     if($mailbox.RecipientType -ne "Shared"){
-        Set-Mailbox -Identity $upn -Type Shared -Verbose
-        $data += "`r`n+set mailbox '$upn' as shared mailbox"
-     }
-
-     $licenses = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
-     foreach($license in $licenses){
-        Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId
-        $data +="`r`n-removing license '$license' from '$upn'"
-     }
-
-}
 #$adhidemailbox msExchangeHideFromAddressList
 
 $data

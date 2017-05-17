@@ -15,20 +15,23 @@ SCRIPTFILELCOATION:\input\users.csv
 #--users are referenced by ProxyAddresses
 #--headers are: ProxyAddresses
 ###################>
+
 $groups = import-csv "$inputpath\mailboxes.csv"
+#$groups = Get-DistributionGroup "ALIAS or DISPLAY NAME"
 $users = import-csv "$inputpath\users.csv"
 
 #for each user add the user to the group with full access rights
+$data = " "
 foreach($group in $groups){
 
      $A = $group.DisplayName
      
      foreach($user in $users){
         $u = $user.ProxyAddresses
-        "$u"
        
         Add-DistributionGroupMember -Identity "$a" -Member "$u"
-        
+        $data += "`r`n+adding member '$u' to distribution group '$a'"
      }
     
 }
+$data

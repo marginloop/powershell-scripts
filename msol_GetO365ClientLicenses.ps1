@@ -34,12 +34,12 @@ Connect-MsolService
 #setting up default output and input paths
 $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
+$LicenseTypes = Get-MsolAccountSku
 $Client =$LicenseTypes.AccountName[0]
 $license_report = "$dir\$client-LicenseReport_$(Get-Date -Format MM-dd-yyyy).csv"
 $debug = $false
 
 #fetch licenses, users, and account name
-$LicenseTypes = Get-MsolAccountSku
 $users = Get-MsolUser -all
 
 #setting up table reference for user readible licenses

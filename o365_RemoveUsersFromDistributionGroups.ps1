@@ -27,7 +27,7 @@ foreach($group in $groups){
         $u = $user.ProxyAddresses
         "$u"
        
-        Remove-DistributionGroupMember -Identity "$a" -Member "$u"
+        Remove-DistributionGroupMember -Identity "$a" -Member "$u" -whatif
         
      }
     
