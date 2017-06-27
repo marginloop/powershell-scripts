@@ -14,7 +14,7 @@ Write-Host "[$time] Opening Powershell Remote Session"
 Import-PSSession $Session
 Connect-MsolService -Credential $UserCredential
 
-$users = @("PUT USER HERE")
+$users = @("")
 
 <######
     
@@ -25,19 +25,24 @@ $users = @("PUT USER HERE")
 $data = "ACTIONS/DETAILS"
 $errs = "ERRORS"
 foreach($u in $users){
-    $mailbox = Get-Mailbox -Identity $u
     
-    if($mailbox.ArchiveStatus -ne "Active"){
+    $mailbox = Get-Mailbox -Identity $u
+    Write-Host "[$(Get-Date)] Checking Mailbox Identity $u"
 
+    if($mailbox.ArchiveStatus -ne "Active"){
+        Write-Host "[$(Get-Date)] Archiving Mailbox"
         Enable-Mailbox -Identity $u -Archive
         $data += "`r`n+archiving mailbox '$mailbox'"
+    }else{
+        "[$(Get-Date)] Verified Mailbox Archived"
     }
 
     #hide the mailbox from the global address list if it listed in the address book
     if($mailbox.HiddenFromAddressListsEnabled -eq $false){
         
         try{
-            Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u
+            "[$(Get-Date)] Hidding mailbox from address lists"
+            Set-Mailbox -HiddenFromAddressListsEnabled $true -Identity $u | Out-Null
             $data += "`r`n-hiding '$mailbox' from address lists"
         }catch{  
             $errs += "`r`n-Mailbox '$mailbox' unable to be hidden from the address book. Please check if o365 is synced through dirsync"
@@ -45,6 +50,7 @@ foreach($u in $users){
         
     }
 
+    "[$(Get-Date)] removing $u from distribution groups"
     $groups = Get-DistributionGroup
     foreach($g in $groups){
         $members = Get-DistributionGroupMember -Identity $g.DisplayName
@@ -56,13 +62,14 @@ foreach($u in $users){
         }
     }
 
+    "[$(Get-Date)] setting $u as shared mailbox"
     $UPN = $mailbox.UserPrincipalName
-     
      if($mailbox.RecipientType -ne "Shared"){
-        Set-Mailbox -Identity $upn -Type Shared -Whatif
+        Set-Mailbox -Identity $upn -Type Shared
         $data += "`r`n+set mailbox '$upn' as shared mailbox"
      }
 
+     "[$(Get-Date)] removing licenses from $u" 
      $licenses = Get-MsolUser -UserPrincipalName $UPN | select -ExpandProperty licenses
      foreach($license in $licenses){
         Set-MsolUserLicense -UserPrincipalName $UPN -RemoveLicenses $license.AccountSkuId
@@ -70,7 +77,7 @@ foreach($u in $users){
      }
 
      if($mailbox.FowardingAddress -ne $null){
-        Set-Mailbox -ForwardingAddress $null -DeliverToMailboxAndForward $false -Whatif
+        Set-Mailbox -ForwardingAddress $null -DeliverToMailboxAndForward $false
      }
 
 }
@@ -83,9 +90,8 @@ foreach($u in $users){
 
 ######>
 
-#$adhidemailbox msExchangeHideFromAddressList
 
 $data
 $errs
 
-.\o365_!CloseShellSession.ps1
+#.\o365_!CloseShellSession.ps1
