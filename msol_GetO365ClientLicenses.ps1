@@ -122,7 +122,7 @@ foreach ($n in $LicenseTypes.ActiveUnits){
 "LICENSES"| Out-File -FilePath $license_report 
 $activeHeader | Out-File -FilePath $license_report -Append
 $licensecount | Out-File -FilePath $license_report -Append
-"Assigned(calculated from assigned licenses)" | Out-File -FilePath $license_report -Append
+"Assigned(calculated..)" | Out-File -FilePath $license_report -Append
 "ASSIGNED LICENSES"| Out-File -FilePath $license_report -Append
 $headers | Out-File -FilePath $license_report -Append
 
