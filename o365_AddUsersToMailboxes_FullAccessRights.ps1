@@ -13,7 +13,7 @@ $inputpath="$dir\input\"
 # SCRIPTFILELCOATION:\input\users.csv
 #--users are referenced by user name/display name
 ###################
-#$groups = import-csv "$inputpath\mailboxes.csv"
+$groups = import-csv "$inputpath\mailboxes.csv"
 #$groups = Get-Mailbox -RecipientTypeDetails UserMailbox
 $users = import-csv "$inputpath\users.csv"
 
@@ -21,7 +21,7 @@ $users = import-csv "$inputpath\users.csv"
 $actionstaken = "`r`nACTIONS/DETAILS:"
 foreach($group in $groups){
 
-     $A = $group.Alias
+     $A = $group.DisplayName
      
      foreach($user in $users){
         $u = $user.DisplayName
@@ -30,8 +30,8 @@ foreach($group in $groups){
             "AccessRights not applied for '$A'"
         }else{
             #Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess -AutoMapping:$true
-            #Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess -AutoMapping:$false
-            $actionstaken += "`r`n+added full access rights '$u' on mailbox '$A'"
+            Add-MailboxPermission -Identity "$A" -User "$u" -AccessRights FullAccess -AutoMapping:$false
+            $actionstaken += "`r`n-removed automapping for '$u' on mailbox '$A'"
         }
 
      }
